@@ -23,9 +23,9 @@ const char *FIELD_DELIM = ",";
     printf("[MESSAGE] "__VA_ARGS__); \
 } while(0)
 
-#define ERROR(...)
-#define WARNING(...)
-#define MESSAGE(...)
+//#define ERROR(...)
+//#define WARNING(...)
+//#define MESSAGE(...)
 
 static char *ADDRESS[] = {
         "$GNTXT",
@@ -73,6 +73,8 @@ void gnrmc_handler(char ** p_line){
 
     float lat = .0f;
     float lon = .0f;
+
+    float speed = .0f;
 
     unsigned date = 0;
     unsigned char day = 0;
@@ -130,7 +132,9 @@ void gnrmc_handler(char ** p_line){
 
     gnrmc_speed:
     tok_speed = read_tok(p_line,"Speed");
-    gnrmc_track:
+    speed = strtof(tok_speed, NULL);
+
+gnrmc_track:
     tok_track = read_tok(p_line,"Track");
 
     gnrmc_date:
@@ -142,9 +146,11 @@ void gnrmc_handler(char ** p_line){
 
     printf("hour:%02u, minute:%02u, second:%05.2f| "
            "%s, lat:%f%s, lon:%f%s| "
+           "speed: %.3f m/s| "
            "date:%02u/%02u/%02u\n",
            hour, minute, second,
            tok_pos_status, lat, lat_dir, lon, lon_dir,
+           speed,
            year,month,day);
 
     gnrmc_skip_rest:
@@ -181,7 +187,7 @@ int main() {
 
         if (num_bytes < 0) {
             ERROR("reading: %s", strerror(errno));
-            return 1;
+            return errno;
         }
 
         char *line = strtok(read_buf, LINE_DELIM);
